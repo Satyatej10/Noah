@@ -1,0 +1,13 @@
+{
+  "deploymentId": "dpl_5phjtW46DQWDVdPAxUcdVhqLN8J2",
+  "sequence": 1,
+  "platform": "vercel",
+  "strategy": "A",
+  "database": null,
+  "status": "failed",
+  "commit": "eda9abc4239eec276522a75a51a728997ea9b378",
+  "deploymentUrl": "https://noah-two-mocha.vercel.app",
+  "durationMs": 68115,
+  "generatedFiles": [],
+  "createdAt": "2026-06-19T18:17:14.270Z"
+}
