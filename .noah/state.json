@@ -1,0 +1,13 @@
+{
+  "generatedBy": "Noah-AI",
+  "schema": 1,
+  "lastDeployment": {
+    "deploymentId": "dpl_5phjtW46DQWDVdPAxUcdVhqLN8J2",
+    "platform": "vercel",
+    "commit": "eda9abc4239eec276522a75a51a728997ea9b378",
+    "url": "https://noah-two-mocha.vercel.app",
+    "status": "failed",
+    "deployedAt": "2026-06-19T18:17:14.270Z"
+  },
+  "lastSuccessfulDeployment": null
+}
