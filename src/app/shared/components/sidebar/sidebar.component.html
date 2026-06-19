@@ -1,0 +1,65 @@
+<!-- Desktop Sidebar -->
+<aside class="sidebar" [class.mobile-open]="isMobileMenuOpen">
+  <div class="sidebar-header">
+    <div class="logo">
+      <span class="logo-icon">🌊</span>
+      <span class="logo-text">Noah</span>
+    </div>
+    <button class="mobile-close" (click)="closeMobileMenu()">✕</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    @for (item of navItems; track item.path) {
+      <a
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+        class="nav-item"
+        (click)="closeMobileMenu()"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="theme-toggle" (click)="themeService.toggleTheme()">
+      <span class="toggle-icon">{{
+        themeService.theme() === "dark" ? "☀️" : "🌙"
+      }}</span>
+      <span class="toggle-label">{{
+        themeService.theme() === "dark" ? "Light Mode" : "Dark Mode"
+      }}</span>
+    </button>
+  </div>
+</aside>
+
+<!-- Mobile Overlay -->
+@if (isMobileMenuOpen) {
+  <div class="sidebar-overlay" (click)="closeMobileMenu()"></div>
+}
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  @for (item of navItems; track item.path) {
+    <a
+      [routerLink]="item.path"
+      routerLinkActive="active"
+      [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+      class="mobile-nav-item"
+    >
+      <span class="mobile-nav-icon">{{ item.icon }}</span>
+      <span class="mobile-nav-label">{{ item.label }}</span>
+    </a>
+  }
+</nav>
+
+<!-- Mobile Top Bar -->
+<header class="mobile-top-bar">
+  <button class="hamburger" (click)="toggleMobileMenu()">☰</button>
+  <span class="mobile-title">Noah</span>
+  <button class="theme-toggle-mobile" (click)="themeService.toggleTheme()">
+    {{ themeService.theme() === "dark" ? "☀️" : "🌙" }}
+  </button>
+</header>

@@ -1,0 +1,155 @@
+<div class="settings-container">
+  <header class="page-header">
+    <h1>Preferences & Settings</h1>
+    <p class="subtitle">
+      Customize app behaviors, default durations, and manage study data backups.
+    </p>
+  </header>
+
+  <!-- Notification Banner -->
+  @if (notification) {
+    <div
+      class="toast"
+      [class.success]="notification.type === 'success'"
+      [class.error]="notification.type === 'error'"
+    >
+      {{ notification.message }}
+    </div>
+  }
+
+  <div class="settings-grid">
+    <!-- Panel 1: Theme & Display -->
+    <div class="settings-card">
+      <h2>Appearance</h2>
+      <p class="card-desc">
+        Toggle the overall visual design style of the learning dashboard.
+      </p>
+      <div class="setting-row">
+        <span class="setting-title">Dark Mode Theme</span>
+        <button class="theme-toggle-btn" (click)="themeService.toggleTheme()">
+          {{
+            themeService.theme() === "dark"
+              ? "🌙 Dark Mode Active"
+              : "☀️ Light Mode Active"
+          }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel 2: Timer Defaults -->
+    <div class="settings-card">
+      <h2>Timer Preferences</h2>
+      <p class="card-desc">
+        Configure default session limits and auto-run transitions.
+      </p>
+
+      <form (ngSubmit)="saveTimerSettings()" class="settings-form">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="workDuration">Default Work Session (min)</label>
+            <input
+              id="workDuration"
+              type="number"
+              [(ngModel)]="timerSettings.workMinutes"
+              name="workMinutes"
+              min="1"
+              max="180"
+            />
+          </div>
+          <div class="form-group">
+            <label for="breakDuration">Default Short Break (min)</label>
+            <input
+              id="breakDuration"
+              type="number"
+              [(ngModel)]="timerSettings.breakMinutes"
+              name="breakMinutes"
+              min="1"
+              max="60"
+            />
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="longBreakDuration">Default Long Break (min)</label>
+            <input
+              id="longBreakDuration"
+              type="number"
+              [(ngModel)]="timerSettings.longBreakMinutes"
+              name="longBreakMinutes"
+              min="1"
+              max="90"
+            />
+          </div>
+          <div class="form-group">
+            <label for="sessionsBefore">Sessions Before Long Break</label>
+            <input
+              id="sessionsBefore"
+              type="number"
+              [(ngModel)]="timerSettings.sessionsBeforeLongBreak"
+              name="sessionsBeforeLongBreak"
+              min="1"
+              max="12"
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          Save Timer Defaults
+        </button>
+      </form>
+    </div>
+
+    <!-- Panel 3: Backup & Recovery -->
+    <div class="settings-card">
+      <h2>Backup & Portability</h2>
+      <p class="card-desc">
+        Export study materials and stats, or import them onto another device.
+      </p>
+      <div class="backup-actions">
+        <button class="btn btn-outline" (click)="exportData()">
+          📤 Export Data (JSON)
+        </button>
+        <label class="btn btn-outline import-label">
+          📥 Import Data (JSON)
+          <input
+            type="file"
+            accept=".json"
+            (change)="importData($event)"
+            style="display: none"
+          />
+        </label>
+      </div>
+    </div>
+
+    <!-- Panel 4: Danger Zone -->
+    <div class="settings-card danger-card">
+      <h2>Danger Zone</h2>
+      <p class="card-desc">
+        Irreversible options. Resetting clears decks, resources, and streaks.
+      </p>
+      <div class="setting-row">
+        <div class="danger-info">
+          <h3>Reset Workspace Database</h3>
+          <p>
+            Delete all flashcards, bookmarks, timers, and learning history
+            stats.
+          </p>
+        </div>
+        <button class="btn btn-danger" (click)="confirmReset()">
+          Reset Database
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONFIRM RESET DIALOG -->
+  <app-confirm-dialog
+    [isOpen]="isConfirmDialogOpen"
+    title="Wipe database completely?"
+    message="This will delete ALL decks, flashcards, study logs, and bookmarks. This action CANNOT be undone."
+    confirmText="Wipe Everything"
+    (confirmed)="resetAllData()"
+    (cancelled)="isConfirmDialogOpen = false"
+  ></app-confirm-dialog>
+</div>

@@ -1,0 +1,207 @@
+<div class="quiz-container">
+  <!-- STATE 1: SETUP -->
+  @if (viewMode === "setup") {
+    <header class="page-header">
+      <h1>Quiz Arena</h1>
+      <p class="subtitle">
+        Generate quizzes dynamically from your flashcard decks to test your
+        recall.
+      </p>
+    </header>
+
+    <div class="setup-card">
+      <h2>Quiz Configuration</h2>
+      <div class="form-group">
+        <label for="deckSelect">Select Deck</label>
+        <select id="deckSelect" [(ngModel)]="selectedDeckId">
+          <option value="" disabled selected>-- Choose a study deck --</option>
+          @for (deck of decks; track deck.id) {
+            <option [value]="deck.id">
+              {{ deck.icon }} {{ deck.name }} ({{ deck.cardCount }} cards)
+            </option>
+          }
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="questionCount">Number of Questions</label>
+        <input
+          id="questionCount"
+          type="number"
+          min="5"
+          max="30"
+          [(ngModel)]="questionCount"
+        />
+      </div>
+
+      <button
+        class="btn btn-primary btn-block btn-lg"
+        [disabled]="!selectedDeckId"
+        (click)="startQuiz()"
+      >
+        Start Quiz 🚀
+      </button>
+    </div>
+  }
+
+  <!-- STATE 2: ACTIVE QUIZ -->
+  @if (viewMode === "active" && session) {
+    <div class="active-quiz-container">
+      <header class="quiz-progress-header">
+        <div class="progress-info">
+          <span class="quiz-title">{{ session.deckName }} Quiz</span>
+          <span class="quiz-count"
+            >Question {{ session.currentIndex + 1 }} of
+            {{ session.totalQuestions }}</span
+          >
+        </div>
+        <div class="progress-bar-container">
+          <div
+            class="progress-fill"
+            [style.width.%]="
+              (session.currentIndex / session.totalQuestions) * 100
+            "
+          ></div>
+        </div>
+      </header>
+
+      @let currentQ = session.questions[session.currentIndex];
+      <div class="question-card">
+        <span class="question-type-badge">{{
+          currentQ.type === "multiple-choice"
+            ? "Multiple Choice"
+            : "Type Answer"
+        }}</span>
+        <h2 class="question-text">{{ currentQ.question }}</h2>
+
+        <!-- Multiple Choice Options -->
+        @if (currentQ.type === "multiple-choice") {
+          <div class="options-grid">
+            @for (opt of currentQ.options; track opt) {
+              <button
+                class="option-btn"
+                [class.selected]="selectedAnswer === opt"
+                [class.correct]="
+                  isAnswerSubmitted && opt === currentQ.correctAnswer
+                "
+                [class.incorrect]="
+                  isAnswerSubmitted &&
+                  selectedAnswer === opt &&
+                  opt !== currentQ.correctAnswer
+                "
+                [disabled]="isAnswerSubmitted"
+                (click)="selectedAnswer = opt"
+              >
+                {{ opt }}
+              </button>
+            }
+          </div>
+        }
+
+        <!-- Typed Answer Option -->
+        @if (currentQ.type === "type-answer") {
+          <div class="type-answer-field">
+            <input
+              type="text"
+              placeholder="Type your answer here..."
+              [(ngModel)]="typedAnswer"
+              [disabled]="isAnswerSubmitted"
+              (keyup.enter)="!isAnswerSubmitted && submitAnswer()"
+            />
+            @if (isAnswerSubmitted) {
+              <div
+                class="feedback-card"
+                [class.success]="isCorrect"
+                [class.error]="!isCorrect"
+              >
+                <p class="feedback-status">
+                  {{ isCorrect ? "🎉 Correct!" : "❌ Incorrect" }}
+                </p>
+                <p>
+                  Correct Answer: <strong>{{ currentQ.correctAnswer }}</strong>
+                </p>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="action-footer">
+        @if (!isAnswerSubmitted) {
+          <button
+            class="btn btn-primary btn-lg"
+            [disabled]="
+              currentQ.type === 'multiple-choice'
+                ? !selectedAnswer
+                : !typedAnswer.trim()
+            "
+            (click)="submitAnswer()"
+          >
+            Check Answer
+          </button>
+        } @else {
+          <button class="btn btn-primary btn-lg" (click)="nextQuestion()">
+            {{
+              session.currentIndex + 1 === session.totalQuestions
+                ? "Finish Quiz"
+                : "Next Question →"
+            }}
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- STATE 3: RESULTS -->
+  @if (viewMode === "result" && session) {
+    <div class="results-container">
+      <div class="score-card">
+        <span class="emoji-banner">{{
+          session.score / session.totalQuestions >= 0.7 ? "🏆" : "💪"
+        }}</span>
+        <h2>Quiz Completed!</h2>
+        <p class="score-deck-name">{{ session.deckName }}</p>
+        <div class="score-radial">
+          <span class="score-num">{{ session.score }}</span>
+          <span class="score-divider">/</span>
+          <span class="score-total">{{ session.totalQuestions }}</span>
+        </div>
+        <p class="score-percentage">
+          {{ Math.round((session.score / session.totalQuestions) * 100) }}%
+          Accuracy
+        </p>
+        <button class="btn btn-primary" (click)="restartSetup()">
+          Back to Setup
+        </button>
+      </div>
+
+      <div class="breakdown-card">
+        <h3>Question Breakdown</h3>
+        <div class="breakdown-list">
+          @for (q of session.questions; track q.id) {
+            <div
+              class="breakdown-item"
+              [class.correct]="q.isCorrect"
+              [class.incorrect]="!q.isCorrect"
+            >
+              <span class="status-indicator">{{
+                q.isCorrect ? "✓" : "✗"
+              }}</span>
+              <div class="breakdown-info">
+                <h4>{{ q.question }}</h4>
+                <p>
+                  Your Answer: <span>{{ q.userAnswer || "Skipped" }}</span>
+                </p>
+                @if (!q.isCorrect) {
+                  <p class="correct-spec">
+                    Correct Answer: <strong>{{ q.correctAnswer }}</strong>
+                  </p>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

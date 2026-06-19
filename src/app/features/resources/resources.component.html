@@ -1,0 +1,198 @@
+<div class="resources-container">
+  <header class="page-header">
+    <div>
+      <h1>Resource Bookmarks</h1>
+      <p class="subtitle">
+        Store and tag articles, videos, and tools for quick reference.
+      </p>
+    </div>
+    <button class="btn btn-primary" (click)="openAddModal()">
+      <span>+</span> Bookmark URL
+    </button>
+  </header>
+
+  <!-- Filter & Search Panel -->
+  <div class="search-filter-panel">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input
+        type="text"
+        placeholder="Search bookmarks by title, description or tags..."
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="applyFilter()"
+      />
+    </div>
+
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+      <button
+        class="tab-btn"
+        [class.active]="selectedCategory === 'all'"
+        (click)="selectedCategory = 'all'; applyFilter()"
+      >
+        All
+      </button>
+      <button
+        class="tab-btn"
+        [class.active]="selectedCategory === 'favorites'"
+        (click)="selectedCategory = 'favorites'; applyFilter()"
+      >
+        ⭐ Favorites
+      </button>
+      @for (cat of categories; track cat) {
+        <button
+          class="tab-btn"
+          [class.active]="selectedCategory === cat"
+          (click)="selectedCategory = cat; applyFilter()"
+        >
+          {{ getCategoryIcon(cat) }} {{ cat | titlecase }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Resource Grid -->
+  <div class="resources-grid">
+    @for (res of filteredResources; track res.id) {
+      <div class="resource-card">
+        <div class="card-header">
+          <span class="category-icon-badge" [attr.data-category]="res.category">
+            {{ getCategoryIcon(res.category) }}
+          </span>
+          <div class="card-header-actions">
+            <button
+              class="action-btn fav-btn"
+              [class.active]="res.isFavorite"
+              (click)="toggleFavorite(res.id, $event)"
+            >
+              ★
+            </button>
+            <button
+              class="action-btn delete-btn"
+              (click)="confirmDelete(res.id, $event)"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="card-body">
+          <h3 class="resource-title">
+            <a [href]="res.url" target="_blank" rel="noopener noreferrer">
+              {{ res.title }} <span class="external-link-arrow">↗</span>
+            </a>
+          </h3>
+          <p class="resource-desc">
+            {{ res.description || "No description provided." }}
+          </p>
+          <span class="resource-url-display">{{ res.url }}</span>
+        </div>
+
+        @if (res.tags && res.tags.length > 0) {
+          <div class="card-footer">
+            <div class="tags-list">
+              @for (tag of res.tags; track tag) {
+                <span class="tag-badge">#{{ tag }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @empty {
+      <div class="empty-state">
+        <span class="empty-icon">📚</span>
+        <h2>No Resources Found</h2>
+        <p>Start saving bookmarks by clicking the "Bookmark URL" button.</p>
+        <button class="btn btn-primary" (click)="openAddModal()">
+          Bookmark URL
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- BOOKMARK MODAL -->
+  @if (isModalOpen) {
+    <div class="modal-overlay" (click)="isModalOpen = false">
+      <div class="modal-card" (click)="$event.stopPropagation()">
+        <h2>Bookmark Resource</h2>
+        <form [formGroup]="resourceForm" (ngSubmit)="saveResource()">
+          <div class="form-group">
+            <label for="resTitle">Title</label>
+            <input
+              id="resTitle"
+              type="text"
+              formControlName="title"
+              placeholder="e.g. RxJS Operators Cheat Sheet"
+            />
+          </div>
+          <div class="form-group">
+            <label for="resUrl">URL</label>
+            <input
+              id="resUrl"
+              type="text"
+              formControlName="url"
+              placeholder="https://example.com/rxjs"
+            />
+          </div>
+          <div class="form-group">
+            <label for="resDesc">Description</label>
+            <textarea
+              id="resDesc"
+              formControlName="description"
+              placeholder="A brief reminder of what this resource is about..."
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <label for="resCategory">Category</label>
+            <select id="resCategory" formControlName="category">
+              @for (cat of categories; track cat) {
+                <option [value]="cat">{{ cat | titlecase }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="resTags">Tags (comma separated)</label>
+            <input
+              id="resTags"
+              type="text"
+              formControlName="tagsString"
+              placeholder="rxjs, reactive, tutorial"
+            />
+          </div>
+          <div class="form-group checkbox-form-group">
+            <label class="checkbox-container">
+              <input type="checkbox" formControlName="isFavorite" />
+              <span class="checkmark"></span>
+              Add to Favorites
+            </label>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="isModalOpen = false"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="resourceForm.invalid"
+            >
+              Save Bookmark
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  }
+
+  <!-- CONFIRM DELETE DIALOG -->
+  <app-confirm-dialog
+    [isOpen]="isConfirmDialogOpen"
+    title="Delete Bookmark?"
+    message="Are you sure you want to delete this bookmark?"
+    (confirmed)="onConfirmDelete()"
+    (cancelled)="isConfirmDialogOpen = false"
+  ></app-confirm-dialog>
+</div>

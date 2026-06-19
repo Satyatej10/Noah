@@ -1,0 +1,138 @@
+<div class="timer-container">
+  <header class="page-header">
+    <h1>Focus Timer</h1>
+    <p class="subtitle">
+      Use the Pomodoro technique to maintain focus and avoid burnout.
+    </p>
+  </header>
+
+  <div class="timer-content-grid">
+    <!-- Big Timer Display Card -->
+    <div
+      class="timer-card"
+      [class.work]="state.mode === 'work'"
+      [class.break]="state.mode !== 'work'"
+    >
+      <div class="mode-badge">{{ getModeLabel() }}</div>
+
+      <!-- SVG Progress Circle -->
+      <div class="timer-circle-wrapper">
+        <svg class="timer-svg" viewBox="0 0 100 100">
+          <circle class="timer-track" cx="50" cy="50" r="45"></circle>
+          <circle
+            class="timer-progress"
+            cx="50"
+            cy="50"
+            r="45"
+            [style.stroke-dashoffset]="
+              282.7 - (282.7 * getProgressPercentage()) / 100
+            "
+          ></circle>
+        </svg>
+        <div class="timer-time-display">
+          <span>{{ state.totalSeconds | timeFormat: "mm:ss" }}</span>
+        </div>
+      </div>
+
+      <div class="timer-actions">
+        <button class="btn btn-outline btn-lg" (click)="timerService.reset()">
+          Reset
+        </button>
+        <button
+          class="btn btn-lg"
+          [class.btn-primary]="state.mode === 'work'"
+          [class.btn-success]="state.mode !== 'work'"
+          (click)="toggleStart()"
+        >
+          {{ state.isRunning ? "Pause" : "Start" }}
+        </button>
+        <button class="btn btn-outline btn-lg" (click)="timerService.skip()">
+          Skip
+        </button>
+      </div>
+
+      <div class="session-tracker">
+        Completed today: <strong>{{ state.sessionsCompleted }} sessions</strong>
+      </div>
+    </div>
+
+    <!-- Quick Settings Card -->
+    <div class="quick-settings-card">
+      <h2>Timer Configuration</h2>
+      <p class="section-desc">
+        Adjust session intervals (in minutes) to fit your rhythm.
+      </p>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-name">💻 Work Duration</span>
+          <span class="setting-val">{{ settings.workMinutes }}m</span>
+        </div>
+        <input
+          type="range"
+          min="5"
+          max="60"
+          step="5"
+          [ngModel]="settings.workMinutes"
+          (ngModelChange)="updateQuickSetting('workMinutes', $event)"
+        />
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-name">☕ Short Break</span>
+          <span class="setting-val">{{ settings.breakMinutes }}m</span>
+        </div>
+        <input
+          type="range"
+          min="1"
+          max="30"
+          step="1"
+          [ngModel]="settings.breakMinutes"
+          (ngModelChange)="updateQuickSetting('breakMinutes', $event)"
+        />
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <span class="setting-name">🌴 Long Break</span>
+          <span class="setting-val">{{ settings.longBreakMinutes }}m</span>
+        </div>
+        <input
+          type="range"
+          min="5"
+          max="45"
+          step="5"
+          [ngModel]="settings.longBreakMinutes"
+          (ngModelChange)="updateQuickSetting('longBreakMinutes', $event)"
+        />
+      </div>
+
+      <div class="toggle-settings">
+        <label class="checkbox-container">
+          <input
+            type="checkbox"
+            [ngModel]="settings.autoStartBreaks"
+            (ngModelChange)="
+              timerService.updateSettings({ autoStartBreaks: $event })
+            "
+          />
+          <span class="checkmark"></span>
+          Auto-start breaks
+        </label>
+
+        <label class="checkbox-container">
+          <input
+            type="checkbox"
+            [ngModel]="settings.autoStartWork"
+            (ngModelChange)="
+              timerService.updateSettings({ autoStartWork: $event })
+            "
+          />
+          <span class="checkmark"></span>
+          Auto-start focus sessions
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
