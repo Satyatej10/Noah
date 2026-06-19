@@ -1,0 +1,24 @@
+{
+  "generatedBy": "Noah-AI",
+  "schema": 2,
+  "project": {
+    "name": null,
+    "language": "TypeScript",
+    "appType": "static"
+  },
+  "platform": "vercel",
+  "strategy": "A",
+  "tier": "free",
+  "frontend": {
+    "framework": "Angular",
+    "root": null
+  },
+  "backend": null,
+  "database": {
+    "provider": null
+  },
+  "buildCommand": "npm run build",
+  "startCommand": "ng serve",
+  "envRequired": [],
+  "generatedFiles": []
+}
